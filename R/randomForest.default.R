@@ -263,7 +263,7 @@ mylevels <- function(x) if (is.factor(x)) levels(x) else 0
                     inbag = if (keep.inbag)
                     matrix(integer(n * ntree), n) else integer(n),
                     #DUP=FALSE,
-                    PACKAGE="randomForest")[-1]
+                    PACKAGE="randomForestMtry")[-1]
         if (keep.forest) {
             ## deal with the random forest outputs
             max.nodes <- max(rfout$ndbigtree)
@@ -409,7 +409,7 @@ mylevels <- function(x) if (is.factor(x)) levels(x) else 0
                     inbag = if (keep.inbag)
                     matrix(integer(n * ntree), n) else integer(1),
                     #DUP=FALSE,
-                    PACKAGE="randomForest")[c(16:28, 36:41)]
+                    PACKAGE="randomForestMtry")[c(16:28, 36:41)]
         ## Format the forest component, if present.
         if (keep.forest) {
             max.nodes <- max(rfout$ndbigtree)
