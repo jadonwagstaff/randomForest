@@ -46,6 +46,18 @@ void regTree(double *x, double *y, int mdim, int nsample, int *lDaughter,
   jdex = (int *) Calloc(nsample, int);
   for (i = 1; i <= nsample; ++i) jdex[i-1] = i;
 
+  // Added j_indices for randomForestMtry
+  // ==================================================
+  int last, *j_indices;
+  j_indices = (int *) Calloc(mtry, int);
+  last = mdim - 1;
+  for (i = 0; i < mtry; ++i) {
+    j_indices[i] = (int) (unif_rand() * (last+1));
+    last--;
+  }
+  // ==================================================
+
+
   ncur = 0;
   nodestart[0] = 0;
   nodepop[0] = nsample;
@@ -86,7 +98,7 @@ void regTree(double *x, double *y, int mdim, int nsample, int *lDaughter,
 
     findBestSplit(x, jdex, y, mdim, nsample, ndstart, ndend, &msplit,
                   &decsplit, &ubest, &ndendl, &jstat, mtry, sumnode,
-                  nodecnt, cat);
+                  nodecnt, cat, j_indices);
 #ifdef RF_DEBUG
     Rprintf(" after findBestSplit: ndstart=%d, ndend=%d, jstat=%d, decsplit=%f, msplit=%d\n",
             ndstart, ndend, jstat, decsplit, msplit);
@@ -167,7 +179,7 @@ void regTree(double *x, double *y, int mdim, int nsample, int *lDaughter,
 void findBestSplit(double *x, int *jdex, double *y, int mdim, int nsample,
                    int ndstart, int ndend, int *msplit, double *decsplit,
                    double *ubest, int *ndendl, int *jstat, int mtry,
-                   double sumnode, int nodecnt, int *cat) {
+                   double sumnode, int nodecnt, int *cat, int *j_indices) {
   int last, ncat[MAX_CAT], icat[MAX_CAT], lc, nl, nr, npopl, npopr, tieVar, tieVal;
   int i, j, kv, l, *mind, *ncase;
   double *xt, *ut, *v, *yl, sumcat[MAX_CAT], avcat[MAX_CAT], tavcat[MAX_CAT], ubestt;
@@ -193,7 +205,11 @@ void findBestSplit(double *x, int *jdex, double *y, int mdim, int nsample,
   tieVar = 1;
   for (i = 0; i < mtry; ++i) {
     critvar = 0.0;
-    j = (int) (unif_rand() * (last+1));
+    //j = (int) (unif_rand() * (last+1)); // From randomForest
+    // Added j_indices for randomForestMtry
+    // ==================================================
+    j = j_indices[i];
+    // ==================================================
     kv = mind[j];
     swapInt(mind[j], mind[last]);
     last--;
