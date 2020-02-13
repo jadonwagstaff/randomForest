@@ -1,5 +1,5 @@
 library(randomForest)
-data(mtcars)
+devtools::install_github("https://github.com/jadonwagstaff/randomForestMtry")
 
 unique_vars <- function(rf) {
   lengths <- rep(as.numeric(NA), rf$ntree)
@@ -13,8 +13,26 @@ unique_vars <- function(rf) {
   return(lengths)
 }
 
-rf <- randomForest(mpg ~ ., mtcars, mtry = 2)
-hist(unique_vars(rf))
+data(mtcars)
+data(imports85)
 
-rfm <- randomForestMtry::randomForest(mpg ~ ., mtcars, mtry = 2)
-all(unique_vars(rfm) <= 2)
+
+# Test randomForestMtry functionality
+#--------------------------------------------------------------------------------
+
+rf_reg <- randomForest(mpg ~ ., mtcars, mtry = 2)
+hist(unique_vars(rf_reg))
+
+rfm_reg <- randomForestMtry::randomForest(mpg ~ ., mtcars, mtry = 2)
+all(unique_vars(rfm_reg) <= 2)
+
+imports85 <- imports85[-2]
+imports85 <- imports85[complete.cases(imports85),]
+
+rf_class <- randomForest(symboling ~ ., imports85, mtry = 2)
+hist(unique_vars(rf_class))
+
+rfm_class <- randomForestMtry::randomForest(symboling ~ ., imports85, mtry = 2)
+all(unique_vars(rfm_class) <= 2)
+
+

@@ -45,7 +45,8 @@ c     main program.
      1     nodepop(nrnodes), nodestart(nrnodes),
      1     idmove(nsample),
      1     ncase(nsample), b(mdim,nsample),
-     1     iv(mred), nodeclass(nrnodes), mind(mred)
+     1     iv(mred), nodeclass(nrnodes), mind(mred),
+     1     j_indices(mtry), nn
 
       double precision tclasspop(nclass), classpop(nclass, nrnodes),
      1     tclasscat(nclass, 53), win(nsample), wr(nclass),
@@ -66,6 +67,17 @@ c     main program.
       nodestart(1) = 1
       nodepop(1) = nuse
       nodestatus(1) = 2
+c
+c     Added j_indices for randomForestMtry
+c     ==================================================
+      nn = mred
+      do mt = 1, mtry
+         call rrand(xrand)
+         j_indices(mt) = int(nn * xrand) + 1
+         nn = nn - 1
+      end do
+c     ==================================================
+c
 c     start main loop
       do 30 kbuild = 1, nrnodes
 c         call intpr("kbuild", 6, kbuild, 1)
@@ -82,7 +94,7 @@ c     initialize for next call to findbestsplit
 
          call findbestsplit(a,b,cl,mdim,nsample,nclass,cat,maxcat,
      1        ndstart, ndend,tclasspop,tclasscat,msplit, decsplit,
-     1        best,ncase, jstat,mtry,win,wr,wl,mred,mind)
+     1        best,ncase, jstat,mtry,win,wr,wl,mred,mind,j_indices)
 c         call intpr("jstat", 5, jstat, 1)
 c         call intpr("msplit", 6, msplit, 1)
 c     If the node is terminal, move on.  Otherwise, split.
@@ -198,10 +210,10 @@ c     the coding into an integer of the categories going left.
       subroutine findbestsplit(a, b, cl, mdim, nsample, nclass, cat,
      1     maxcat, ndstart, ndend, tclasspop, tclasscat, msplit,
      2     decsplit, best, ncase, jstat, mtry, win, wr, wl,
-     3     mred, mind)
+     3     mred, mind, j_indices)
       implicit double precision(a-h,o-z)
       integer a(mdim,nsample), cl(nsample), cat(mdim),
-     1     ncase(nsample), b(mdim,nsample), nn, j
+     1     ncase(nsample), b(mdim,nsample), j_indices(mtry), nn, j
       double precision tclasspop(nclass), tclasscat(nclass,53), dn(53),
      1     win(nsample), wr(nclass), wl(nclass), xrand
       integer mind(mred), ncmax, ncsplit,nhit, ntie
@@ -226,7 +238,14 @@ c     start main loop through variables to find best split
 c     sampling mtry variables w/o replacement.
       do mt = 1, mtry
          call rrand(xrand)
-         j = int(nn * xrand) + 1
+c        j = int(nn * xrand) + 1
+c        From randomForest
+c
+c        Added j_indices for randomForestMtry
+c        ==================================================
+         j = j_indices(mt)
+c        ==================================================
+c
          mvar = mind(j)
          mind(j) = mind(nn)
          mind(nn) = mvar
